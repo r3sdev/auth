@@ -1,2 +1,2 @@
-import configuration from './configuration'
-export { configuration }
+import configuration, { validSchema } from './configuration'
+export { configuration, validSchema }
