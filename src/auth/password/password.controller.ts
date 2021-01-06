@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, Put } from '@nestjs/common';
 import { ApiOperation, ApiOkResponse, ApiForbiddenResponse, ApiTags } from '@nestjs/swagger';
-import { User } from '../../common/models';
+import { User } from '../../users/user.entity';
 
 @Controller('auth/password')
 @ApiTags('auth/password')

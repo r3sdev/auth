@@ -1,29 +1,31 @@
 import { ApiProperty, ApiHideProperty, } from "@nestjs/swagger";
 import { Expose } from 'class-transformer';
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
+@Entity()
 export class User {
-    @ApiHideProperty()
-    _id: string;
-
-    @ApiProperty({ example: "5fc33f1a4350e1ce20b2f803", description: "The user's id" })
+    @ApiProperty({ example: 1, description: "The user's id" })
     @Expose()
-    get id() {
-        return this._id
-    }
+    @PrimaryGeneratedColumn()
+    id?: number;
 
     @ApiProperty({ example: "user@tld.com", description: "The user's email address" })
     @Expose()
+    @Column({ unique: true })
     email: string;
 
     @ApiProperty({ example: "John", description: "The user's first name" })
     @Expose()
+    @Column()
     firstName: string;
 
     @ApiProperty({ example: "Doe", description: "The user's last name" })
     @Expose()
+    @Column()
     lastName: string;
 
     @ApiHideProperty()
+    @Column()
     password: string;
 
     @Expose()
@@ -34,16 +36,5 @@ export class User {
 
     constructor(partial: Partial<User>) {
         Object.assign(this, partial);
-    }
-
-    toJSON() {
-        const {_id, ...user} = this;
-
-        delete user.password
-
-        return {
-            id: _id,
-            ...user,
-        }
     }
 }

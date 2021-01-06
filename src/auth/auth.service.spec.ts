@@ -6,6 +6,8 @@ import { mockedJwtService, mockedPasswordService, mockedUsersService } from '../
 import { PasswordService } from './password';
 import * as bcrypt from 'bcrypt';
 import { UserExistsException, SomethingWentWrongException, WrongCredentialsException } from '../../src/exception';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { User } from '../users/user.entity';
 
 describe('AuthService', () => {
   let authService: AuthService;
@@ -13,12 +15,10 @@ describe('AuthService', () => {
   let passwordService: PasswordService;
 
   beforeEach(async () => {
-    // jest.clearAllMocks();
-
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         {
-          provide: 'DATABASE_CONNECTION',
+          provide: getRepositoryToken(User),
           useValue: {}
         },
         {
@@ -72,10 +72,13 @@ describe('AuthService', () => {
         password: "hashedpassword"
       })
   
+      // ClassSerializerInterceptor is not being called here
+      // This runs in e2e tests only, via super test
       expect(result).toEqual({
         email: data.email,
         firstName: data.firstName,
         lastName: data.lastName,
+        password: "hashedpassword",
         id: "test"
       })
     })
@@ -109,7 +112,7 @@ describe('AuthService', () => {
       const result = await authService.getAuthenticatedUser("test@test.com", "test")
   
       expect(result).toEqual({
-        _id: "test",
+        id: "test",
         email: "test@test.com",
         firstName: "John",
         lastName: "Test",
@@ -135,7 +138,7 @@ describe('AuthService', () => {
     })
 
     it('returns a cookie', () => {
-      const cookie = authService.getCookieWithJwtToken("test");
+      const cookie = authService.getCookieWithJwtToken(1);
 
       expect(cookie).toEqual("Authentication=signedPayload; HttpOnly; Path=/; Max-Age=600")
     })

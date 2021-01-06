@@ -1,5 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
 import { UsersController, UsersService } from './';
+import { User } from './user.entity';
 
 describe('UsersController', () => {
   let controller: UsersController;
@@ -9,7 +11,7 @@ describe('UsersController', () => {
       controllers: [UsersController],
       providers: [
         {
-          provide: 'DATABASE_CONNECTION',
+          provide: getRepositoryToken(User),
           useValue: {}
         },
         UsersService

@@ -1,32 +1,27 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { MongoClient, Db } from 'mongodb';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from '../users/user.entity';
+
 
 @Module({
-  imports: [ConfigModule],
-  controllers: [],
-  providers: [
-    {
-      provide: 'DATABASE_CONNECTION',
-      useFactory: async (configService: ConfigService): Promise<Db> => {
-        try {
-          const client = await MongoClient.connect(configService.get('database.uri'), {
-            useUnifiedTopology: true,
-            useNewUrlParser: true,
-          });
-
-          const db = client.db(configService.get('database.name'));
-
-          await db.collection('users').createIndex({ email: 1 }, { unique: true, sparse: true });
-
-          return db;
-        } catch (e) {
-          throw e;
-        }
-      },
-      inject: [ConfigService]
-    },
+  imports: [
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.get('database.host'),
+        port: configService.get('database.port'),
+        username: configService.get('database.user'),
+        password: configService.get('database.password'),
+        database: configService.get('database.db'),
+        entities: [
+          User
+        ],
+        synchronize: true,
+      })
+    }),
   ],
-  exports: ['DATABASE_CONNECTION'],
 })
 export class DatabaseModule {}

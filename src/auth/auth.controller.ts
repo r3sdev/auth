@@ -1,18 +1,18 @@
 import { Body, Controller, Delete, Get, HttpCode, Post, Req, Res, SerializeOptions, UseGuards } from '@nestjs/common';
 import { Response } from 'express';
-import { ApiOperation, ApiTags, ApiOkResponse, ApiCreatedResponse, ApiForbiddenResponse } from '@nestjs/swagger';
-import { User } from '../common/models';
+import { ApiOperation, ApiTags, ApiOkResponse, ApiCreatedResponse, ApiForbiddenResponse, ApiBadRequestResponse, ApiInternalServerErrorResponse } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginUserDto, RegisterUserDto } from './dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { LocalAuthGuard } from './local-auth.guard';
 import type { RequestWithUser } from './interface/request-with-user.interface';
+import { User } from '../users/user.entity';
 
 
 @Controller('auth')
 @SerializeOptions({
     strategy: 'excludeAll'
-  })
+})
 @ApiTags('auth')
 export class AuthController {
     constructor(private authService: AuthService) { }
@@ -26,7 +26,7 @@ export class AuthController {
 
     async postLogin(@Req() req: RequestWithUser, @Res() res: Response, @Body() _: LoginUserDto) {
         const { user } = req;
-        const cookie = this.authService.getCookieWithJwtToken(user._id);
+        const cookie = this.authService.getCookieWithJwtToken(user.id);
         res.setHeader('Set-Cookie', cookie);
 
         return res.send(user)
@@ -36,7 +36,8 @@ export class AuthController {
     @Post('register')
     @ApiOperation({ summary: 'Register user' })
     @ApiCreatedResponse({ description: 'The user has successfully registered.', type: User })
-    @ApiForbiddenResponse({ description: 'Forbidden.' })
+    @ApiBadRequestResponse({ description: 'This email is already associated with an account' })
+    @ApiInternalServerErrorResponse({ description: 'Something went wrong' })
 
     async postRegister(@Body() data: RegisterUserDto) {
         return this.authService.registerUser(data)
@@ -54,10 +55,10 @@ export class AuthController {
     }
 
     @UseGuards(JwtAuthGuard)
-    @Get('profile')
-    @ApiOperation({ summary: 'User profile' })
+    @Get('current-user')
+    @ApiOperation({ summary: 'Current user' })
 
-    async getProfile(@Req() req: RequestWithUser) {
+    async getCurrentUser(@Req() req: RequestWithUser) {
         return new User(req.user)
     }
 

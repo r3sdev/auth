@@ -1,32 +1,38 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { Db, ObjectID } from 'mongodb';
+import { Injectable } from '@nestjs/common';
 import { UserNotFoundException } from '../exception/user-not-found.exception';
-import { User } from '../common/models';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from './user.entity';
 import { CreateUserDto } from '../auth/dto';
 
 @Injectable()
-export class UsersService  {
-  constructor(@Inject('DATABASE_CONNECTION') private db: Db) {}
+export class UsersService {
+  constructor(
+    @InjectRepository(User)
+    private usersRepository: Repository<User>
+  ) { }
 
   async findOneByEmail(email: string) {
-    const user = await this.db.collection('users').findOne({ email });
+    const user = await this.usersRepository.findOne({ email });
     if (user) {
       return new User(user);
     }
     throw new UserNotFoundException();
   }
 
-  async findOneById(userId: string) {
-    const user = await this.db.collection('users').findOne({ _id: new ObjectID(userId) });
+  async findOneById(id: number) {
+    const user = await this.usersRepository.findOne({ id });
     if (user) {
       return new User(user);
     }
     throw new UserNotFoundException();
   }
 
-  async create(user: CreateUserDto): Promise<User> {
-    const response = await this.db.collection('users').insertOne(user);
+  async create(userData: CreateUserDto): Promise<User> {
+    const newUser = this.usersRepository.create(userData);
+    
+    await this.usersRepository.save(newUser);
 
-    return response.ops[0] as User;
+    return newUser;
   }
 }

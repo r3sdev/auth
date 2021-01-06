@@ -11,6 +11,8 @@ import { LocalStrategy } from './local.strategy';
 import { JwtStrategy } from './jwt.strategy';
 import { ConfigService } from '@nestjs/config';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { User } from '../users/user.entity';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -36,7 +38,7 @@ describe('AuthController', () => {
           })
         },
         {
-          provide: 'DATABASE_CONNECTION',
+          provide: getRepositoryToken(User),
           useValue: {}
         },
         {
@@ -127,12 +129,12 @@ describe('AuthController', () => {
 
   describe('/auth/profile', () => {
     it('should be defined', () => {
-      expect(controller.getProfile).toBeDefined();
+      expect(controller.getCurrentUser).toBeDefined();
     });
 
     it('handles showing the current user profile', () => {
       return request(app.getHttpServer())
-        .get('/auth/profile')
+        .get('/auth/current-user')
         .expect(200)
     })
   })

@@ -1,7 +1,7 @@
-import { MongoDbErrorCode } from "../../src/database/mongodb.error-codes.enum";
+import { PostgresErrorCode } from "../../src/database/postgres-error-code.enum";
 
 export const mockedUser = {
-    _id: "test",
+    id: "test",
     email: "test@test.com",
     firstName: "John",
     lastName: "Test",
@@ -11,7 +11,7 @@ export const mockedUser = {
 export const mockedUsersService = {
     create: jest.fn()
         .mockResolvedValueOnce(mockedUser)
-        .mockRejectedValueOnce({ code: MongoDbErrorCode.UniqueViolation })
+        .mockRejectedValueOnce({ code: PostgresErrorCode.UniqueViolation })
         .mockRejectedValueOnce({}),
     findOneByEmail: jest.fn()
         .mockResolvedValueOnce(mockedUser)

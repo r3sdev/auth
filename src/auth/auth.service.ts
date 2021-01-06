@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { User } from '../common/models';
 import { UsersService } from '../users/users.service';
 import { RegisterUserDto } from './dto';
 import { hash } from 'bcrypt';
-import { MongoDbErrorCode } from '../database/mongodb.error-codes.enum';
+import { PostgresErrorCode } from '../database/postgres-error-code.enum';
 import { PasswordService } from './password';
 import { configuration } from '../config';
 import { SomethingWentWrongException, UserExistsException, WrongCredentialsException } from '../exception';
+import { User } from '../users/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -27,9 +27,9 @@ export class AuthService {
         ...rest,
         password: hashedPassword
       });
-      return new User(createdUser).toJSON();
+      return new User(createdUser);
     } catch (error) {
-      if (error?.code === MongoDbErrorCode.UniqueViolation) {
+      if (error?.code === PostgresErrorCode.UniqueViolation) {
         throw new UserExistsException();
       }
       throw new SomethingWentWrongException(error.code);
@@ -50,7 +50,7 @@ export class AuthService {
     }
   }
 
-  getCookieWithJwtToken(userId: string) {
+  getCookieWithJwtToken(userId: TokenPayload['userId']) {
     const payload: TokenPayload = { userId };
     const token = this.jwtService.sign(payload);
 

@@ -7,6 +7,7 @@ import { configuration, validSchema } from '../config';
 import { AuthModule } from '../auth';
 import { APP_FILTER } from '@nestjs/core';
 import { ExceptionsLoggerFilter } from '../utils/exceptions-logger.filter';
+import { DatabaseModule } from '../database';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ExceptionsLoggerFilter } from '../utils/exceptions-logger.filter';
         // abortEarly: true,
       },
     }),
+    DatabaseModule,
     AuthModule,
     UsersModule,
   ],
